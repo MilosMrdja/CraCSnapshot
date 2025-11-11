@@ -3,25 +3,31 @@ package org.springframework.samples.petclinic.system;
 import org.crac.Context;
 import org.crac.Core;
 import org.crac.Resource;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.web.server.context.WebServerApplicationContext;
+import org.springframework.context.ApplicationContext;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
 
-@RestController
-@RequestMapping("/crac")
+@Controller
+@RequestMapping("/checkpoint")
 public class CraCController implements Resource {
 
-	@PostMapping("/checkpoint")
-	public String createSnapshot(){
-		try{
+	@GetMapping
+	public String createSnapshot() {
+		try {
+
+			System.out.println("SSS");
 			Core.checkpointRestore();
+
 			return "Snapshot created successfully.";
-		}catch (Exception e){
-			//e.printStackTrace();
-			return "Error during creating a snapshot" + e.getMessage();
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+			return "Error during creating a snapshot: " + e.getMessage();
 		}
 	}
-
 
 	@Override
 	public void beforeCheckpoint(Context<? extends Resource> context) throws Exception {
@@ -32,4 +38,5 @@ public class CraCController implements Resource {
 	public void afterRestore(Context<? extends Resource> context) throws Exception {
 		System.out.println("Restoring from checkpoint...");
 	}
+
 }
