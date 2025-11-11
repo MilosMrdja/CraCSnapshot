@@ -1,42 +1,27 @@
-package org.springframework.samples.petclinic.system;
+package org.springframework.samples.petclinic.CRaC;
 
-import org.crac.Context;
-import org.crac.Core;
-import org.crac.Resource;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.web.server.context.WebServerApplicationContext;
-import org.springframework.context.ApplicationContext;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
 @RequestMapping("/checkpoint")
-public class CraCController implements Resource {
+public class CraCController {
+
+	private final ICRaCService craCService;
+
+	public CraCController(ICRaCService craCService) {
+		this.craCService = craCService;
+	}
 
 	@GetMapping
+	@ResponseBody
 	public String createSnapshot() {
-		try {
-
-			System.out.println("SSS");
-			Core.checkpointRestore();
-
-			return "Snapshot created successfully.";
-		}
-		catch (Exception e) {
-			e.printStackTrace();
-			return "Error during creating a snapshot: " + e.getMessage();
-		}
-	}
-
-	@Override
-	public void beforeCheckpoint(Context<? extends Resource> context) throws Exception {
-		System.out.println("Preparing for checkpoint (closing resources, etc.)");
-	}
-
-	@Override
-	public void afterRestore(Context<? extends Resource> context) throws Exception {
-		System.out.println("Restoring from checkpoint...");
+		return craCService.createSnapshot();
 	}
 
 }
