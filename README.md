@@ -108,13 +108,13 @@ java -jar target/spring-petclinic-4.0.0-SNAPSHOT.jar
 
 ```bash
 # Build Maven project
-./mvnw clean package
+./mvnw clean package -DskipTests
 
 # Build Docker image
 docker build -t petclinic .
 ```
 
-#### Step 2: Create Checkpoint
+#### Step 2: Start the application
 
 **On Windows (PowerShell):**
 
@@ -135,9 +135,15 @@ docker run -d \
   java -XX:CRaCCheckpointTo=/opt/crac-files -jar /opt/app/petclinic.jar
 ```
 
-**Wait**: Wait 5-10 seconds for the application to start and the checkpoint to be created. The container will automatically stop when the checkpoint is created.
+**Wait**: Wait 5-10 seconds for the application to start.
 
-#### Step 3: Restore from Checkpoint
+#### Step 3: Create Checkpoint - Open new PowerShell (Windows)
+```powershell
+docker exec -it petclinic_container /opt/app/create_checkpoint.sh
+```
+**Wait**: Wait a few second for creation of the checkpoint. After that your application should be down.
+
+#### Step 4: Restore from Checkpoint
 
 **On Windows (PowerShell):**
 
@@ -158,7 +164,7 @@ docker run -d \
   java -XX:CRaCRestoreFrom=/opt/crac-files
 ```
 
-#### Step 4: Verification
+#### Step 5: Verification
 
 ```bash
 # Check if the application is running
@@ -170,21 +176,41 @@ curl http://localhost:8081
 
 The application provides a CLI for checkpoint operations that enables seamless checkpoint creation and restoration workflow.
 
-#### How It Works
 
-1. **Start the application** - The application starts normally and is ready to accept commands
-2. **Trigger checkpoint creation** - Use the `/create-snapshot` command to create a checkpoint
-3. **Automatic shutdown** - After creating the checkpoint, the application automatically shuts down
-4. **Restore from checkpoint** - Use `restore.ps1` to restore the application to the checkpointed state
-
-#### Step 1: Start the Application
+#### Step 1: Build Docker Image
 
 ```bash
-# Start the application
-java -jar target/spring-petclinic-4.0.0-SNAPSHOT.jar
+# Build Maven project
+./mvnw clean package -DskipTests
+
+# Build Docker image
+docker build -t petclinic .
 ```
 
-#### Step 2: Create Checkpoint via CLI
+#### Step 2: Start the application
+
+**On Windows (PowerShell):**
+
+```powershell
+.\checkpoint.ps1
+```
+
+**On Linux:**
+
+```bash
+docker run -d \
+  --cap-add=CHECKPOINT_RESTORE \
+  --cap-add=SYS_PTRACE \
+  -p 8080:8080 \
+  --name petclinic_container \
+  -v "$(pwd)/crac-files:/opt/crac-files" \
+  petclinic \
+  java -XX:CRaCCheckpointTo=/opt/crac-files -jar /opt/app/petclinic.jar
+```
+
+**Wait**: Wait 5-10 seconds for the application to start.
+
+#### Step 3: Create Checkpoint via CLI
 
 Once the application is running, you can interact with it through the console:
 
